@@ -9,7 +9,6 @@ A Python-based reverse shell implementation that allows remote command execution
 - **Legal Use Only**: Only use this tool on systems you own or have explicit written permission to test
 - **Unauthorized Access is Illegal**: Using this tool to access systems without permission violates computer fraud laws
 - **Educational Purpose**: This project is for learning about network security, Python sockets, and ethical hacking principles
-- **Responsible Disclosure**: If you find vulnerabilities, report them to system owners through proper channels
 
 By using this tool, you agree that you are solely responsible for how it is used.
 
